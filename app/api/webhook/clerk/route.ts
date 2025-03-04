@@ -1,29 +1,30 @@
 import { Webhook, WebhookRequiredHeaders } from "svix";
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  console.log("webhook post route")
+  console.log("webhook post route");
+
   const payload = await req.json();
 
-  // Correctly retrieve headers using `next/headers`
-  const header = headers();
-
+  // Safer - directly use `req.headers`
   const heads = {
-    "svix-id": header.get("svix-id"),
-    "svix-timestamp": header.get("svix-timestamp"),
-    "svix-signature": header.get("svix-signature"),
+    "svix-id": req.headers.get("svix-id"),
+    "svix-timestamp": req.headers.get("svix-timestamp"),
+    "svix-signature": req.headers.get("svix-signature"),
   };
 
+  console.log("🔎 All received headers:", heads);
+
   const wh = new Webhook(process.env.NEXT_CLERK_WEBHOOK_SECRET || "");
-  console.log("webhook env" + wh)
+  console.log("webhook secret loaded:", process.env.NEXT_CLERK_WEBHOOK_SECRET);
+
   try {
     const evt = wh.verify(
       JSON.stringify(payload),
       heads as WebhookRequiredHeaders
     );
 
-    console.log("✅ Webhook received:", evt);
+    console.log("✅ Webhook verified and received:", evt);
 
     return NextResponse.json({ status: "success" }, { status: 200 });
   } catch (err) {
