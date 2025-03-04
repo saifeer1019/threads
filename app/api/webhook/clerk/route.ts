@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
+  console.log("webhook post route")
   const payload = await req.json();
 
   // Correctly retrieve headers using `next/headers`
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
   };
 
   const wh = new Webhook(process.env.NEXT_CLERK_WEBHOOK_SECRET || "");
-
+  console.log("webhook env" + wh)
   try {
     const evt = wh.verify(
       JSON.stringify(payload),
